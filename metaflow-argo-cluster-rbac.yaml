@@ -1,18 +1,16 @@
-# ------------------------------------------------------------
-# A) Metaflow / Workflow-runner ServiceAccounts (Argo + Default)
-# ------------------------------------------------------------
+
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: metapolis-flow-sa
   namespace: argo
----
+
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: metapolis-flow-sa
   namespace: default
----
+
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -62,11 +60,8 @@ roleRef:
   kind: ClusterRole
   name: metapolis-flow-clusterrole
 
-# ------------------------------------------------------------
-# B) Argo UI (argo-server) cross-namespace READ permissions
-#    (THIS is what makes UI show default namespace stuff)
-# ------------------------------------------------------------
----
+
+
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -79,7 +74,7 @@ rules:
   - apiGroups: ["argoproj.io"]
     resources: ["workflows", "workflowtemplates", "cronworkflows", "clusterworkflowtemplates"]
     verbs: ["get", "list", "watch"]
----
+
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
