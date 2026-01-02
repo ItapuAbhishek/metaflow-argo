@@ -1,0 +1,35 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: metapolis-flow-role
+  namespace: argo
+rules:
+  # Argo Workflows objects
+  - apiGroups: ["argoproj.io"]
+    resources: ["workflows", "workflowtemplates"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+  # Pods + logs (Argo creates pods)
+  - apiGroups: [""]
+    resources: ["pods", "pods/log"]
+    verbs: ["get", "list", "watch", "create", "delete"]
+
+  # Read configmap (mf-minio-config)
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    verbs: ["get", "list", "watch"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: metapolis-flow-rb
+  namespace: argo
+subjects:
+  - kind: ServiceAccount
+    name: metapolis-flow-sa
+    namespace: argo
+roleRef:
+  kind: Role
+  name: metapolis-flow-role
+  apiGroup: rbac.authorization.k8s.io

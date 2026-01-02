@@ -1,0 +1,94 @@
+# ------------------------------------------------------------
+# A) Metaflow / Workflow-runner ServiceAccounts (Argo + Default)
+# ------------------------------------------------------------
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: metapolis-flow-sa
+  namespace: argo
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: metapolis-flow-sa
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: metapolis-flow-clusterrole
+rules:
+  - apiGroups: ["argoproj.io"]
+    resources:
+      - workflows
+      - workflowtemplates
+      - cronworkflows
+      - clusterworkflowtemplates
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch", "create", "delete", "patch", "update"]
+
+  - apiGroups: [""]
+    resources: ["pods/log"]
+    verbs: ["get", "list", "watch"]
+
+  - apiGroups: [""]
+    resources: ["pods/exec"]
+    verbs: ["create", "get"]
+
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["get", "list", "watch", "create", "patch"]
+
+  - apiGroups: [""]
+    resources: ["configmaps", "secrets"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: metapolis-flow-clusterrolebinding
+subjects:
+  - kind: ServiceAccount
+    name: metapolis-flow-sa
+    namespace: argo
+  - kind: ServiceAccount
+    name: metapolis-flow-sa
+    namespace: default
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: metapolis-flow-clusterrole
+
+# ------------------------------------------------------------
+# B) Argo UI (argo-server) cross-namespace READ permissions
+#    (THIS is what makes UI show default namespace stuff)
+# ------------------------------------------------------------
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: argo-server-cross-namespace-read
+rules:
+  - apiGroups: [""]
+    resources: ["namespaces"]
+    verbs: ["get", "list", "watch"]
+
+  - apiGroups: ["argoproj.io"]
+    resources: ["workflows", "workflowtemplates", "cronworkflows", "clusterworkflowtemplates"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: argo-server-cross-namespace-read
+subjects:
+  - kind: ServiceAccount
+    name: argo-server
+    namespace: argo
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: argo-server-cross-namespace-read

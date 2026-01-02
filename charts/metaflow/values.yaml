@@ -1,0 +1,46 @@
+# ----------------------------
+# Metaflow Metadata Service
+# ----------------------------
+metaflow-service:
+  metadatadb:
+    name: metaflow
+    user: metaflow
+    password: metaflow
+
+  extraEnvFrom:
+    - configMapRef:
+        name: mf-minio-config
+    - secretRef:
+        name: mf-minio-creds
+
+# ----------------------------
+# Metaflow UI
+# ----------------------------
+metaflow-ui:
+  uiBackend:
+    metadatadb:
+      name: metaflow
+      user: metaflow
+      password: metaflow
+
+    # ⚠️ NO env: block here
+    # Chart already defines METAFLOW_SERVICE_URL internally
+
+    extraEnvFrom:
+      - configMapRef:
+          name: mf-minio-config
+      - secretRef:
+          name: mf-minio-creds
+
+# ----------------------------
+# PostgreSQL
+# ----------------------------
+postgresql:
+  enabled: true
+  auth:
+    database: metaflow
+    username: metaflow
+    password: metaflow
+  image:
+    repository: postgres
+    tag: "14.13"
