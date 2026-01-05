@@ -39,8 +39,8 @@ Docker
 argo_hello_demo_flow.py – example Metaflow pipeline  
 charts/ – Helm charts for Metaflow services  
 minio-deployment.yaml – MinIO deployment and service  
-configmap.yaml – Metaflow configuration  
-secret.yaml –  MinIO credentials  
+configmap.yaml – Metaflow configuration used by Argo workflows  
+secret.yaml – MinIO credentials and S3 endpoint for Argo pods   
 metapolis-flow-sa-rbac.yaml – ServiceAccount and RBAC  
 metaflow-argo-cluster-rbac.yaml – ClusterRole and ClusterRoleBinding  
 
@@ -59,15 +59,22 @@ Deploy Metaflow services using Helm:
 
 helm install metaflow ./charts/metaflow -n metaflow --create-namespace
 
-Deploy Argo Workflows in the argo namespace:
+Deploy Argo Workflows in the argo namespace (using official Argo quick start):
 
-kubectl create namespace argo  
-kubectl apply -n argo -f <argo-install-manifest>.yaml
+kubectl create namespace argo
+kubectl apply -n argo -f https://github.com/argoproj/argo-workflows/releases/latest/download/install.yaml
+
 
 Apply RBAC:
 
 kubectl apply -f metapolis-flow-sa-rbac.yaml  
 kubectl apply -f metaflow-argo-cluster-rbac.yaml
+
+Apply Metaflow configuration and secrets in the argo namespace:
+
+kubectl apply -n argo -f configmap.yaml
+kubectl apply -n argo -f secret.yaml
+
 
 This enables workflow execution, pod creation, and cross-namespace visibility.
 
@@ -79,6 +86,10 @@ Port-forward the MinIO, Metaflow, and Argo services to your local machine so the
 
 Before running Metaflow from your local machine, configure the required environment variables to point to the MinIO and Metaflow services exposed via port-forwarding.
 
+- METAFLOW_S3_ENDPOINT_URL is used only for local runs via port-forward.
+- Argo pods do not use this value.
+- Kubernetes pods get the MinIO endpoint via secrets.
+- METAFLOW_ARGO_WORKFLOWS_ENV_VARS_TO_SKIP prevents local values from being baked into Argo templates.
 
 
 ## Monitoring
@@ -91,15 +102,12 @@ MinIO UI: http://localhost:9001
 
 Create the Argo WorkflowTemplate:
 
-python argo_hello_demo_flow.py argo-workflows create
+python argo_hello_demo_flow.py --datastore=s3 argo-workflows --name argohellodemoflow create
 
 Trigger a workflow run:
 
-python argo_hello_demo_flow.py argo-workflows trigger
+python argo_hello_demo_flow.py --datastore=s3 argo-workflows --name argohellodemoflow trigger
 
-## Issues
-
-Environment variables and resource limits defined using Metaflow decorators are not automatically injected into Argo WorkflowTemplates and must be manually updated in the template after creation. 
 
 
 ## Conclusion
