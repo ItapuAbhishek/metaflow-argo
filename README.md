@@ -117,15 +117,25 @@ This project demonstrates how Metaflow pipelines can be executed on Kubernetes u
 
 
 export METAFLOW_S3_ENDPOINT_URL=http://127.0.0.1:19000
+
 export METAFLOW_SERVICE_URL=http://127.0.0.1:18080
+
 export AWS_ACCESS_KEY_ID=minio
+
 export AWS_SECRET_ACCESS_KEY=minio123
+
 export METAFLOW_DEFAULT_DATASTORE=s3
+
 export METAFLOW_DATASTORE_SYSROOT_S3=s3://metaflow
+
 export METAFLOW_ARGO_WORKFLOWS_NAMESPACE=argo
+
 export METAFLOW_KUBERNETES_NAMESPACE=argo
+
 export METAFLOW_ARGO_WORKFLOWS_NAMESPACE=argo
+
 export METAFLOW_ARGO_WORKFLOWS_ENV_VARS_TO_SKIP=METAFLOW_S3_ENDPOINT_URL
+
 export METAFLOW_SERVICE_INTERNAL_URL=http://metaflow-metaflow-service.metaflow.svc.cluster.local:8080
 
 
